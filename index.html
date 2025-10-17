@@ -32,8 +32,7 @@
     height: auto;
     border-radius: 20px;
     margin: 2vh 0;
-    /* ปิด transition เพื่อให้ GIF เปลี่ยนทันที */
-    transition: none;
+    transition: none; /* เปลี่ยน GIF ทันที */
   }
 
   .lyrics {
@@ -70,9 +69,7 @@
     text-align: center;
   }
 
-  #endCredit span {
-    display: block;
-  }
+  #endCredit span { display: block; }
 
   /* Loading screen */
   #loading {
@@ -113,11 +110,12 @@
 
 <script>
 const song = document.getElementById("song");
-const playButton = document.getElementById("playButton");
 const gif = document.getElementById("gif");
 const lyricsBox = document.getElementById("lyricsBox");
+const playButton = document.getElementById("playButton");
 const loading = document.getElementById("loading");
 
+// ข้อมูลเนื้อเพลง + GIF
 const lyricsData = [
   { start: 0, end: 4, text: "อย่าลืมดื่มน้ำให้เยอะ ให้มันชุ่มคอ" },
   { start: 4, end: 8, text: "อย่าลืมนอนพัก นอนหลับให้เพียงพอ" },
@@ -137,34 +135,33 @@ const gifMap = [
 ];
 
 // 🔹 Preload GIF ทั้งหมด
-const gifFiles = gifMap.map(g => g.src);
 const preloadedGifs = [];
 let gifsLoaded = 0;
-
-gifFiles.forEach(src => {
+gifMap.forEach(g => {
   const img = new Image();
-  img.src = src;
+  img.src = g.src;
   img.onload = () => {
     gifsLoaded++;
-    if(gifsLoaded === gifFiles.length && song.readyState >= 2) {
+    if(gifsLoaded === gifMap.length && song.readyState >= 2){
       loading.style.display = 'none';
     }
   };
   preloadedGifs.push(img);
 });
 
-// Check if audio is loaded
+// ตรวจสอบเพลงโหลดครบ
 song.addEventListener('canplaythrough', () => {
-  if(gifsLoaded === gifFiles.length) {
+  if(gifsLoaded === gifMap.length){
     loading.style.display = 'none';
   }
 });
 
 let isPlaying = false;
-let currentGif = "7.gif"; // เริ่มด้วย 7.gif
+let currentGif = "7.gif"; // GIF เริ่มต้น
 
+// ปุ่ม Play / Pause
 playButton.addEventListener("click", () => {
-  if (!isPlaying) {
+  if(!isPlaying){
     song.play();
     isPlaying = true;
     playButton.textContent = "⏸ Pause";
@@ -177,18 +174,18 @@ playButton.addEventListener("click", () => {
   }
 });
 
-// 🔹 เปลี่ยน GIF ทันที ตามเวลาเพลง
+// 🔹 แสดงเนื้อเพลง + เปลี่ยน GIF ตามเวลาเพลง (โหลดทันที)
 song.addEventListener("timeupdate", () => {
-  const current = song.currentTime;
+  const currentTime = song.currentTime;
 
   // แสดงเนื้อเพลง
-  const currentLine = lyricsData.find(l => current >= l.start && current < l.end);
+  const currentLine = lyricsData.find(l => currentTime >= l.start && currentTime < l.end);
   lyricsBox.textContent = currentLine ? currentLine.text : "";
 
   // เปลี่ยน GIF
-  for (let i = gifMap.length - 1; i >= 0; i--) {
-    if (current >= gifMap[i].time) {
-      if (currentGif !== gifMap[i].src) {
+  for(let i = gifMap.length-1; i >= 0; i--){
+    if(currentTime >= gifMap[i].time){
+      if(currentGif !== gifMap[i].src){
         currentGif = gifMap[i].src;
         const preloaded = preloadedGifs.find(img => img.src.includes(currentGif));
         gif.src = preloaded ? preloaded.src : currentGif;
@@ -198,6 +195,7 @@ song.addEventListener("timeupdate", () => {
   }
 });
 
+// เพลงจบ → รีเซ็ตปุ่ม
 song.addEventListener("ended", () => {
   isPlaying = false;
   playButton.textContent = "▶️ Play";
