@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>อย่าลืมรักตัวเองนะ 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Itim', cursive;
+    background-color: #fff0f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 5vh 2vw;
+  }
+
+  h1 {
+    color: #ff4081;
+    font-size: clamp(20px, 6vw, 32px);
+    margin-bottom: 1vh;
+  }
+
+  img {
+    width: 80vw;
+    max-width: 400px;
+    max-height: 50%;
+    height: auto;
+    border-radius: 20px;
+    margin: 2vh 0;
+    transition: opacity 0.5s;
+  }
+
+  .lyrics {
+    width: 90%;
+    min-height: 2em;
+    font-size: clamp(16px, 5vw, 24px);
+    color: #ff4081;
+    line-height: 1.5;
+    text-align: center;
+    margin-bottom: 2vh;
+  }
+
+  #playButton {
+    background-color: #ff80ab;
+    border: none;
+    color: white;
+    padding: 1vh 3vw;
+    border-radius: 25px;
+    font-size: clamp(14px, 4vw, 20px);
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 50px;
+  }
+
+  #playButton:hover {
+    background-color: #f50057;
+  }
+
+  #endCredit {
+    margin-top: auto;
+    color: #fbb2cb;
+    font-size: clamp(10px, 3vw, 16px);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  #endCredit span {
+    display: block;
+  }
+
+  /* Loading screen */
+  #loading {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color:#fff0f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family: 'Itim', cursive;
+    color:#ff4081;
+    font-size:clamp(16px,4vw,24px);
+    z-index: 1000;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="loading">กำลังโหลดเพลงและภาพ...</div>
+
+<h1>อย่าลืมเปิดเสียงนะงับ🔊</h1>
+
+<img id="gif" src="7.gif" alt="ภาพประกอบ">
+
+<div class="lyrics" id="lyricsBox"></div>
+
+<button id="playButton">▶️ Play</button>
+
+<audio id="song" src="อย่าลืม - Gentle Reminder.mp3" preload="auto"></audio>
+
+<div id="endCredit">
+  <span>IG : Aisukung8</span>
+</div>
+
+<script>
+const song = document.getElementById("song");
+const playButton = document.getElementById("playButton");
+const gif = document.getElementById("gif");
+const lyricsBox = document.getElementById("lyricsBox");
+const loading = document.getElementById("loading");
+
+const lyricsData = [
+  { start: 0, end: 4, text: "อย่าลืมดื่มน้ำให้เยอะ ให้มันชุ่มคอ" },
+  { start: 4, end: 8, text: "อย่าลืมนอนพัก นอนหลับให้เพียงพอ" },
+  { start: 8, end: 15, text: "อย่าลืมกินข้าวด้วยล่ะ เดี๋ยวจะเป็นโรคกระเพาะ" },
+  { start: 15, end: 19, text: "อย่าลืมว่ายิ้มของเธอสวยงามที่สุด" },
+  { start: 19, end: 22, text: "ไม่อยากให้เธอทำมันหล่นหาย" },
+  { start: 22, end: 999, text: "และข้อสุดท้ายที่เธอห้ามลืม คือ 'ฉันรักเธอ'" }
+];
+
+const gifMap = [
+  { time: 0, src: "1.gif" },
+  { time: 4, src: "2.gif" },
+  { time: 8, src: "3.gif" },
+  { time: 15, src: "4.gif" },
+  { time: 19, src: "5.gif" },
+  { time: 22, src: "6.gif" }
+];
+
+// Preload GIF
+const gifFiles = gifMap.map(g => g.src);
+const preloadedGifs = [];
+let gifsLoaded = 0;
+
+gifFiles.forEach(src => {
+  const img = new Image();
+  img.src = src;
+  img.onload = () => {
+    gifsLoaded++;
+    if(gifsLoaded === gifFiles.length && song.readyState >= 2) {
+      loading.style.display = 'none';
+    }
+  }
+  preloadedGifs.push(img);
+});
+
+// Check if audio is loaded
+song.addEventListener('canplaythrough', () => {
+  if(gifsLoaded === gifFiles.length) {
+    loading.style.display = 'none';
+  }
+});
+
+let isPlaying = false;
+let currentGif = "7.gif"; // เริ่มด้วย 7.gif
+
+playButton.addEventListener("click", () => {
+  if (!isPlaying) {
+    song.play();
+    isPlaying = true;
+    playButton.textContent = "⏸ Pause";
+    playButton.style.backgroundColor = "#f50057";
+  } else {
+    song.pause();
+    isPlaying = false;
+    playButton.textContent = "▶️ Play";
+    playButton.style.backgroundColor = "#ff80ab";
+  }
+});
+
+song.addEventListener("timeupdate", () => {
+  const current = song.currentTime;
+
+  // แสดงเนื้อเพลงบรรทัดเดียว
+  const currentLine = lyricsData.find(l => current >= l.start && current < l.end);
+  lyricsBox.textContent = currentLine ? currentLine.text : "";
+
+  // เปลี่ยน GIF ตามเวลาเพลง
+  for (let i = gifMap.length - 1; i >= 0; i--) {
+    if (current >= gifMap[i].time) {
+      if (currentGif !== gifMap[i].src) {
+        currentGif = gifMap[i].src;
+        gif.style.opacity = 0;
+        setTimeout(() => {
+          gif.src = currentGif + "?t=" + new Date().getTime();
+          gif.style.opacity = 1;
+        }, 200);
+      }
+      break;
+    }
+  }
+});
+
+song.addEventListener("ended", () => {
+  isPlaying = false;
+  playButton.textContent = "▶️ Play";
+  playButton.style.backgroundColor = "#ff80ab";
+});
+</script>
+
+</body>
+</html>
