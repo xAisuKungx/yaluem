@@ -25,27 +25,15 @@
     margin-bottom: 1vh;
   }
 
-  #gifContainer {
-    position: relative;
+  img {
     width: 80vw;
     max-width: 400px;
-    height: 300px;
-    margin: 2vh 0;
-  }
-
-  .gifImg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    max-height: 50%;
+    height: auto;
     border-radius: 20px;
-    object-fit: cover;
-    opacity: 0;
+    margin: 2vh 0;
     transition: opacity 0.5s;
   }
-
-  .gifImg.active { opacity: 1; }
 
   .lyrics {
     width: 90%;
@@ -110,14 +98,7 @@
 
 <h1>อย่าลืมเปิดเสียงนะงับ🔊</h1>
 
-<div id="gifContainer">
-  <img src="1.gif" class="gifImg active">
-  <img src="2.gif" class="gifImg">
-  <img src="3.gif" class="gifImg">
-  <img src="4.gif" class="gifImg">
-  <img src="5.gif" class="gifImg">
-  <img src="6.gif" class="gifImg">
-</div>
+<img id="gif" src="7.gif" alt="ภาพประกอบ">
 
 <div class="lyrics" id="lyricsBox"></div>
 
@@ -132,9 +113,9 @@
 <script>
 const song = document.getElementById("song");
 const playButton = document.getElementById("playButton");
+const gif = document.getElementById("gif");
 const lyricsBox = document.getElementById("lyricsBox");
 const loading = document.getElementById("loading");
-const gifs = document.querySelectorAll(".gifImg");
 
 const lyricsData = [
   { start: 0, end: 4, text: "อย่าลืมดื่มน้ำให้เยอะ ให้มันชุ่มคอ" },
@@ -146,33 +127,40 @@ const lyricsData = [
 ];
 
 const gifMap = [
-  { time: 0, index: 0 },
-  { time: 4, index: 1 },
-  { time: 8, index: 2 },
-  { time: 15, index: 3 },
-  { time: 19, index: 4 },
-  { time: 22, index: 5 }
+  { time: 0, src: "1.gif" },
+  { time: 4, src: "2.gif" },
+  { time: 8, src: "3.gif" },
+  { time: 15, src: "4.gif" },
+  { time: 19, src: "5.gif" },
+  { time: 22, src: "6.gif" }
 ];
 
-// Preload audio & GIFs
+// Preload GIF
+const gifFiles = gifMap.map(g => g.src);
+const preloadedGifs = [];
 let gifsLoaded = 0;
-gifs.forEach(img => {
+
+gifFiles.forEach(src => {
+  const img = new Image();
+  img.src = src;
   img.onload = () => {
     gifsLoaded++;
-    if (gifsLoaded === gifs.length && song.readyState >= 2) {
+    if(gifsLoaded === gifFiles.length && song.readyState >= 2) {
       loading.style.display = 'none';
     }
-  };
+  }
+  preloadedGifs.push(img);
 });
 
-// Hide loading screen when audio ready
+// Check if audio is loaded
 song.addEventListener('canplaythrough', () => {
-  if (gifsLoaded === gifs.length) {
+  if(gifsLoaded === gifFiles.length) {
     loading.style.display = 'none';
   }
 });
 
 let isPlaying = false;
+let currentGif = "7.gif"; // เริ่มด้วย 7.gif
 
 playButton.addEventListener("click", () => {
   if (!isPlaying) {
@@ -191,16 +179,21 @@ playButton.addEventListener("click", () => {
 song.addEventListener("timeupdate", () => {
   const current = song.currentTime;
 
-  // แสดงเนื้อเพลง
+  // แสดงเนื้อเพลงบรรทัดเดียว
   const currentLine = lyricsData.find(l => current >= l.start && current < l.end);
   lyricsBox.textContent = currentLine ? currentLine.text : "";
 
-  // แสดง GIF ตามเวลา
+  // เปลี่ยน GIF ตามเวลาเพลง
   for (let i = gifMap.length - 1; i >= 0; i--) {
     if (current >= gifMap[i].time) {
-      gifs.forEach((img, idx) => {
-        img.classList.toggle("active", idx === gifMap[i].index);
-      });
+      if (currentGif !== gifMap[i].src) {
+        currentGif = gifMap[i].src;
+        gif.style.opacity = 0;
+        setTimeout(() => {
+          gif.src = currentGif + "?t=" + new Date().getTime();
+          gif.style.opacity = 1;
+        }, 200);
+      }
       break;
     }
   }
