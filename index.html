@@ -19,31 +19,11 @@
     padding: 5vh 2vw;
   }
 
-  h1 {
-    color: #ff4081;
-    font-size: clamp(20px, 6vw, 32px);
-    margin-bottom: 1vh;
-  }
+  h1 { color: #ff4081; font-size: clamp(20px, 6vw, 32px); margin-bottom: 1vh; }
 
-  img {
-    width: 80vw;
-    max-width: 400px;
-    max-height: 50%;
-    height: auto;
-    border-radius: 20px;
-    margin: 2vh 0;
-    transition: none; /* เปลี่ยน GIF ทันที */
-  }
+  img { width: 80vw; max-width: 400px; max-height: 50%; height: auto; border-radius: 20px; margin: 2vh 0; transition: none; }
 
-  .lyrics {
-    width: 90%;
-    min-height: 2em;
-    font-size: clamp(16px, 5vw, 24px);
-    color: #ff4081;
-    line-height: 1.5;
-    text-align: center;
-    margin-bottom: 2vh;
-  }
+  .lyrics { width: 90%; min-height: 2em; font-size: clamp(16px, 5vw, 24px); color: #ff4081; line-height: 1.5; text-align: center; margin-bottom: 2vh; }
 
   #playButton {
     background-color: #ff80ab;
@@ -57,21 +37,11 @@
     margin-bottom: 50px;
   }
 
-  #playButton:hover {
-    background-color: #f50057;
-  }
+  #playButton:hover { background-color: #f50057; }
 
-  #endCredit {
-    margin-top: auto;
-    color: #fbb2cb;
-    font-size: clamp(10px, 3vw, 16px);
-    line-height: 1.5;
-    text-align: center;
-  }
-
+  #endCredit { margin-top: auto; color: #fbb2cb; font-size: clamp(10px, 3vw, 16px); line-height: 1.5; text-align: center; }
   #endCredit span { display: block; }
 
-  /* Loading screen */
   #loading {
     position: fixed;
     top:0;
@@ -87,7 +57,6 @@
     font-size:clamp(16px,4vw,24px);
     z-index: 1000;
   }
-
 </style>
 </head>
 <body>
@@ -102,7 +71,7 @@
 
 <button id="playButton">▶️ Play</button>
 
-<audio id="song" src="อย่าลืม - Gentle Reminder.mp3" preload="auto"></audio>
+<audio id="song" src="อย่าลืม - Gentle Reminder.mp3"></audio>
 
 <div id="endCredit">
   <span>IG : Aisukung8</span>
@@ -134,7 +103,7 @@ const gifMap = [
   { time: 22, src: "6.gif" }
 ];
 
-// 🔹 Preload GIF ทั้งหมด
+// 🔹 Preload GIF
 const preloadedGifs = [];
 let gifsLoaded = 0;
 gifMap.forEach(g => {
@@ -142,18 +111,11 @@ gifMap.forEach(g => {
   img.src = g.src;
   img.onload = () => {
     gifsLoaded++;
-    if(gifsLoaded === gifMap.length && song.readyState >= 2){
-      loading.style.display = 'none';
+    if(gifsLoaded === gifMap.length){
+      loading.style.display = 'none'; // GIF โหลดครบ → ซ่อน Loading
     }
   };
   preloadedGifs.push(img);
-});
-
-// ตรวจสอบเพลงโหลดครบ
-song.addEventListener('canplaythrough', () => {
-  if(gifsLoaded === gifMap.length){
-    loading.style.display = 'none';
-  }
 });
 
 let isPlaying = false;
@@ -162,7 +124,7 @@ let currentGif = "7.gif"; // GIF เริ่มต้น
 // ปุ่ม Play / Pause
 playButton.addEventListener("click", () => {
   if(!isPlaying){
-    song.play();
+    song.play(); // เพลงเริ่มเมื่อผู้ใช้กด
     isPlaying = true;
     playButton.textContent = "⏸ Pause";
     playButton.style.backgroundColor = "#f50057";
@@ -174,7 +136,7 @@ playButton.addEventListener("click", () => {
   }
 });
 
-// 🔹 แสดงเนื้อเพลง + เปลี่ยน GIF ตามเวลาเพลง (โหลดทันที)
+// แสดงเนื้อเพลง + เปลี่ยน GIF ตามเวลาเพลง
 song.addEventListener("timeupdate", () => {
   const currentTime = song.currentTime;
 
