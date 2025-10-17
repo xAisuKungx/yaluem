@@ -32,7 +32,8 @@
     height: auto;
     border-radius: 20px;
     margin: 2vh 0;
-    transition: opacity 0.5s;
+    /* ปิด transition เพื่อให้ GIF เปลี่ยนทันที */
+    transition: none;
   }
 
   .lyrics {
@@ -135,7 +136,7 @@ const gifMap = [
   { time: 22, src: "6.gif" }
 ];
 
-// Preload GIF
+// 🔹 Preload GIF ทั้งหมด
 const gifFiles = gifMap.map(g => g.src);
 const preloadedGifs = [];
 let gifsLoaded = 0;
@@ -148,7 +149,7 @@ gifFiles.forEach(src => {
     if(gifsLoaded === gifFiles.length && song.readyState >= 2) {
       loading.style.display = 'none';
     }
-  }
+  };
   preloadedGifs.push(img);
 });
 
@@ -176,23 +177,21 @@ playButton.addEventListener("click", () => {
   }
 });
 
+// 🔹 เปลี่ยน GIF ทันที ตามเวลาเพลง
 song.addEventListener("timeupdate", () => {
   const current = song.currentTime;
 
-  // แสดงเนื้อเพลงบรรทัดเดียว
+  // แสดงเนื้อเพลง
   const currentLine = lyricsData.find(l => current >= l.start && current < l.end);
   lyricsBox.textContent = currentLine ? currentLine.text : "";
 
-  // เปลี่ยน GIF ตามเวลาเพลง
+  // เปลี่ยน GIF
   for (let i = gifMap.length - 1; i >= 0; i--) {
     if (current >= gifMap[i].time) {
       if (currentGif !== gifMap[i].src) {
         currentGif = gifMap[i].src;
-        gif.style.opacity = 0;
-        setTimeout(() => {
-          gif.src = currentGif + "?t=" + new Date().getTime();
-          gif.style.opacity = 1;
-        }, 200);
+        const preloaded = preloadedGifs.find(img => img.src.includes(currentGif));
+        gif.src = preloaded ? preloaded.src : currentGif;
       }
       break;
     }
